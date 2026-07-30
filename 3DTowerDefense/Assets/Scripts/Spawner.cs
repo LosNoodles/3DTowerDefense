@@ -1,0 +1,65 @@
+using UnityEngine;
+using UnityEngine.Pool;
+
+public class Spawner : MonoBehaviour
+{
+    [SerializeField] private Transform spawnPoint;
+    [SerializeField] private Transform target;
+    [SerializeField] private Enemy enemyPrefab;
+    [SerializeField] private float timeBetweenSpawns = 5f;
+
+    private IObjectPool<Enemy> enemyPool;
+    private float nextSpawnTime;
+
+    private void Awake()
+    {
+        enemyPool = new ObjectPool<Enemy>(
+            CreateEnemy,
+            OnTakeEnemy,
+            OnReleaseEnemy,
+            OnDestroyEnemy
+        );
+    }
+
+    private void Update()
+    {
+        if (Time.time < nextSpawnTime)
+            return;
+
+        SpawnEnemy();
+        nextSpawnTime = Time.time + timeBetweenSpawns;
+    }
+
+    private void SpawnEnemy()
+    {
+        Enemy enemy = enemyPool.Get();
+
+        enemy.Initialize(
+            spawnPoint.position,
+            target,
+            enemyPool
+        );
+    }
+
+    private Enemy CreateEnemy()
+    {
+        Enemy enemy = Instantiate(enemyPrefab);
+        enemy.gameObject.SetActive(false);
+        return enemy;
+    }
+
+    private void OnTakeEnemy(Enemy enemy)
+    {
+        enemy.gameObject.SetActive(true);
+    }
+
+    private void OnReleaseEnemy(Enemy enemy)
+    {
+        enemy.gameObject.SetActive(false);
+    }
+
+    private void OnDestroyEnemy(Enemy enemy)
+    {
+        Destroy(enemy.gameObject);
+    }
+}
