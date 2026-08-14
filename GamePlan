@@ -1,0 +1,30 @@
+Setting: 
+  Zeit: Ziel: Epochen, Prototyp: Mittelalter
+  Umgebung: Wald, Grün, Ruinen, Burg, Wasser (?)
+  Gegner: Fantasy (Grüne Humanoide)
+  Spieler: Mensch
+  Artstyle: Low-Poly
+Gameplay:
+  Türme bauen
+  Türme steuern
+  Türme upgraden
+    Muss an Target gekauft werden und braucht Zeit, weil KI Untersützer das Upgrade durchführen
+  Melee
+    Freischaltung Waffen
+  Ressourcen sammeln: Stein, Holz, Drops
+    Freischaltung Werkzeuge
+    Ressourcengebäude für KI Unterstützer (Holzfällerhütte, Steinmetz,...)
+  Marktplatz ist dein zu beschützendes Target 
+    KI Unterstützer (Melee in der Lane, Turmunterstützer,...)
+  Storymap: Missionen über eine übergeordnete Karte
+  Target ist 
+Scenarien:
+  Bewegte Targets (Karavane beschützen)
+  Klassischer Base-Defend
+Meta-Progression:
+  Skill-Tree
+  Perma-Upgrades für Gebäude
+  KI Unterstützer verbessern für bessere Turmupgrades, stärkere Einheiten, besseres Ressourcen-Farming
+Architektur:
+  Koop/Netzwerkfähig
+  
