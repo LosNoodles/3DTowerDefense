@@ -21,6 +21,12 @@ public class Spawner : MonoBehaviour
         );
     }
 
+    private void Start()
+    {
+        SpawnEnemy();
+        nextSpawnTime = Time.time + timeBetweenSpawns;
+    }
+
     private void Update()
     {
         if (Time.time < nextSpawnTime)

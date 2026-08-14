@@ -31,46 +31,47 @@ public class Enemy : MonoBehaviour
 
         currentHealth = maxHealth;
 
-        // Position the enemy and align it with the NavMesh. If the exact spawnPosition is not
-        // on the NavMesh, sample the nearest NavMesh position so the agent can find a path.
+        transform.position = spawnPosition;
         gameObject.SetActive(true);
 
-        // Try to sample a point on the NavMesh near the spawn position
-        UnityEngine.AI.NavMeshHit hit;
-        float sampleRadius = 2f;
-        Vector3 navPos = spawnPosition;
-        if (UnityEngine.AI.NavMesh.SamplePosition(spawnPosition, out hit, sampleRadius, UnityEngine.AI.NavMesh.AllAreas))
+        if (agent == null)
+            agent = GetComponent<NavMeshAgent>();
+
+        if (agent != null)
         {
-            navPos = hit.position;
+            agent.enabled = true;
+
+            UnityEngine.AI.NavMeshHit hit;
+            float sampleRadius = 5f;
+            Vector3 navPos = spawnPosition;
+            if (UnityEngine.AI.NavMesh.SamplePosition(spawnPosition, out hit, sampleRadius, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                navPos = hit.position;
+            }
+
+            transform.position = navPos;
+            agent.Warp(navPos);
+
+            agent.speed = moveSpeed;
+            agent.stoppingDistance = 0.2f;
+            agent.isStopped = false;
+
+            if (target != null)
+            {
+                agent.SetDestination(target.position);
+            }
         }
-
-        // Move transform and warp agent to the valid navmesh position
-        transform.position = navPos;
-        agent.Warp(navPos);
-
-        agent.speed = moveSpeed;
-        agent.stoppingDistance = 0f;
-        agent.isStopped = false;
-
-        // Set destination to the target's position
-        if (target != null)
-            agent.SetDestination(target.position);
     }
 
     private void Update()
     {
-        if (agent.pathPending || target == null)
+        if (agent == null || !agent.isOnNavMesh || agent.pathPending || target == null)
             return;
 
-        // Check if the agent has reached the end of the path on the NavMesh
-        bool reachedOnNavMesh = false;
-        if (!agent.hasPath || agent.remainingDistance <= 0.1f || agent.velocity.sqrMagnitude < 0.01f)
-        {
-            reachedOnNavMesh = true;
-        }
+        if (!agent.hasPath)
+            return;
 
-        // Verify the enemy is physically close to the target transform horizontally (ignores Y offset)
-        if (reachedOnNavMesh)
+        if (agent.remainingDistance <= agent.stoppingDistance + 0.5f)
         {
             Vector3 enemyPos = transform.position;
             Vector3 targetPos = target.position;
@@ -80,7 +81,7 @@ public class Enemy : MonoBehaviour
                 new Vector2(targetPos.x, targetPos.z)
             );
 
-            if (horizontalDistance <= 1.5f)
+            if (horizontalDistance <= 2.0f)
             {
                 ReachTarget();
             }
@@ -91,7 +92,14 @@ public class Enemy : MonoBehaviour
     {
         OnTargetReached?.Invoke(this);
 
-        pool.Release(this);
+        if (pool != null)
+        {
+            pool.Release(this);
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public void TakeDamage(int damage)
@@ -106,11 +114,21 @@ public class Enemy : MonoBehaviour
 
     private void Die()
     {
-        pool.Release(this);
+        if (pool != null)
+        {
+            pool.Release(this);
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     private void OnDisable()
     {
-        agent.ResetPath();
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
     }
 }
